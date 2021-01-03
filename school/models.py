@@ -40,7 +40,8 @@ class Grupo(models.Model):
     
 class Matricula(models.Model):
     estudiante = models.OneToOneField(Estudiante, on_delete=models.CASCADE)
-    curso = models.ForeignKey(Curso, on_delete=models.CASCADE)
+    curso = models.ForeignKey(Grupo, on_delete=models.CASCADE)
+    estado = models.BooleanField(default=False)
 
     def __str__(self):
         return "%s Matriculado en el Curso: %s" %(self.estudiante, self.curso)
