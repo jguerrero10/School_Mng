@@ -7,3 +7,4 @@ db.sqlite3
 .DS_Store
 Prueba.py
 school/migrations/0001_initial.py
+prueba.html

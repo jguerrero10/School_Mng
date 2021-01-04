@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.http import JsonResponse
 from .forms import *
 
 def home(request):
@@ -10,6 +11,25 @@ def matricula_index(request):
     return render(request, 'matricula/index.html', context)
 
 def crear_matricula(request):
-    form = MatriculaForm()
-    context = {'form': form}
+    formMatricula = MatriculaForm()    
+    context = {'formMatricula': formMatricula}
     return render(request, 'matricula/crear.html', context)
+
+def crear_estudiante(request):
+    if request.method == 'POST': 
+        form = EstudianteForm(request.POST)
+        if form.is_valid():
+            form.save()
+            context = {'icon': 'success',
+                        'title': 'Correcto!!!',
+                        'text': 'Estudiante guardado correctamente.'}
+            return JsonResponse(context)
+        else:                  
+            context = {'icon': 'error',
+                        'title': 'Opps!!!',
+                        'text': 'Problemas al guardar Estudiante, verifique los datos ingresados.'}
+            return JsonResponse(context)    
+    else:
+        form = EstudianteForm()
+        context = {'form': form}
+        return render(request, 'estudiante/formEstudiante.html', context)
