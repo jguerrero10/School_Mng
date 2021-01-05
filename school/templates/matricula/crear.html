@@ -1,8 +1,9 @@
 {% extends 'layout.html' %}
 {% load static %}
+
+{% block title%} Matricula | Crear {% endblock %}
   
 {% block style %}
-<script src="https://kit.fontawesome.com/65eb220159.js" crossorigin="anonymous"></script>
 
 {% endblock style %}
 
@@ -16,70 +17,56 @@
         <h3 class="page-section-heading text-center text-uppercase text-secondary mb-0">Crear Matricula</h3>
     </div>
     <div class="card-body">
-        <form>
-            <div class="form-group  row mb-3">
-                <label class="col-sm-2" for="id_estudiante">Estudiante:</label>
-                <div class="col-sm-8">{{ formMatricula.estudiante}}</div>
-                <div class="col-sm-2">
-                    <button type="button" class="btn" id="btnEstudiante">
+        <form action="">
+            <div class="row mb-3">
+                <label for="id_estudiante" class="col-sm-1 col-form-label">Estudiante:</label>
+                <div class="col-sm-10">
+                    {{ formMatricula.estudiante }}
+                </div>
+                <div class="col-sm-1">
+                    <button type="button" id="btnEstudiante" class="btn">
                         <i class="fas fa-plus-circle"></i>
                     </button>
-                </div>                
+                </div>
             </div>
-            <div class="form-group  row mb-3">
-                <label class="col-sm-2" for="id_curso">Curso:</label>
-                <div class="col-sm-8">{{ formMatricula.curso}}</div> 
-                <div class="col-sm-2">
-                    <button type="button" class="btn" data-toggle="modal" data-target="#exampleModal">
-                        <i class="fas fa-plus-circle"></i>
-                    </button>
-                </div>                
-            </div> 
-            <div class="form-group  row mb-3">
-                <label class="col-sm-2" for="id_estudiante">Estado:</label>
-                <div class="col-sm-8">{{ formMatricula.estado}}</div>                                
-            </div>                                 
+            <div class="row mb-3">
+                <label for="id_curso" class="col-sm-1 col-form-label">Curso:</label>
+                <div class="col-sm-10">
+                    {{ formMatricula.curso }}
+                </div>
+                <div class="col-sm-1">
+                    <a class="btn" href="{% url 'crear_grupo' %}"><i class="fas fa-plus-circle"></i></a>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="mb-3">
+                    <div class="form-check form-switch">
+                        {{ formMatricula.estado }}
+                        <label class="form-check-label" for="id_estado">Estado</label>
+                    </div>    
+                </div>
+            </div>
         </form>
+        
     </div>
 </div>
 
 {% endblock main %}
-{% block modal %}
-<div class="modal" id="modal" tabindex="-1" role="dialog">
-    
-</div>
 
-{% endblock modal %}
 
 {% block script %}
 <script>    
+    function formEstudiante(){
+        formulario = $('#formEstudiante').serialize();
+        url = "{% url 'crear_estudiante' %}";
+        gestionForm(url, formulario)
+    }
+
     $(function() {         
         $("#btnEstudiante").click(function(){ 
             url = "{% url 'crear_estudiante' %}";         
-            $("#modal").load(url, function(){
-              $(this).modal('show')  
-            })                  
-        });                
+            ejecutarModal(url);                 
+        });      
     });
-    function estudiante(){
-        url = "{% url 'crear_estudiante' %}";
-        $.ajax({
-            type: 'POST',
-            url: url,
-            data: $("#formulario").serialize(),            
-            success: function(data){
-                $('#modal').modal('toggle');
-                swal({
-                    icon: data.icon,
-                    title: data.title,
-                    text: data.text
-                })
-                .then(() => {
-                    location.reload();
-                });
-            }
-        });
-    } 
 </script>
-<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 {% endblock script %}

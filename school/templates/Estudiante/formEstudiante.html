@@ -3,7 +3,7 @@
 {% block modal_title %} Crear Estudiante {% endblock modal_title %}
 
 {% block modal_body %}
-<form id="formulario" action="{% url 'crear_estudiante' %}" method="POST">
+<form id="formEstudiante">
     {% csrf_token %}
     <div class="form-group">
         <label for="id_nombre">Nombre:</label>
@@ -25,5 +25,5 @@
 {% endblock modal_body %}
 
 {% block modal_button %}
-<button type="button" onclick="estudiante()" class="btn btn-primary">Guardar</button>
+<button type="button" onclick="formEstudiante()" class="btn btn-primary">Guardar</button>
 {% endblock modal_button %} 

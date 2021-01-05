@@ -11,10 +11,10 @@ class Estudiante(models.Model):
     def edad(self):
         hoy = dt.date.today()
         edad = hoy - self.fec_nac
-        return edad
+        return int(edad.days/365)
     def __str__(self):
         edad = self.edad()
-        return "%s %s -- ID: %s --edad: %s" %(self.nombre, self.apellidos, self.num_id, edad)
+        return "%s %s -- ID: %s -- Edad: %s Años" %(self.nombre, self.apellidos, self.num_id, edad)
 
 class Profesor(models.Model):
     nombre = models.CharField(max_length=30)
@@ -25,10 +25,28 @@ class Profesor(models.Model):
         return 'Profesor: %s %s' %(self.nombre, self.apellidos)
 
 class Curso(models.Model):
-    nombre = models.CharField(max_length=30, unique=True)
+    grado_CHOICES = [
+        ('0', 'Transición'),
+        ('1', 'Primero'),
+        ('2', 'Segundo'),
+        ('3', 'Tercero'),
+        ('4', 'Cuarto'),
+        ('5', 'Quinto'),
+        ('6', 'Sexto'),
+        ('7', 'Séptimo'),
+        ('8', 'Octavo'),
+        ('9', 'Noveno'),
+        ('10', 'Décimo'),
+        ('11', 'Undécimo')
+    ]
+    grado = models.CharField(max_length=2, choices=grado_CHOICES, default='0')
 
     def __str__(self):
-        return self.nombre
+        grado_str = 'N/A'
+        for i in self.grado_CHOICES:
+            if(self.grado == i[0]):
+                grado_str = i[1]
+        return grado_str
 
 class Grupo(models.Model):
     curso = models.ForeignKey(Curso, on_delete=models.CASCADE)
