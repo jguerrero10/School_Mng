@@ -1,28 +1,45 @@
 from django.db import models
+from django.contrib.auth.models import User
 import datetime as dt
 import statistics as stats
 
-class Estudiante(models.Model):
-    nombre = models.CharField(max_length=30)
-    apellidos = models.CharField(max_length=60)
+class Usuario(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     num_id = models.CharField(max_length=11)
     fec_nac = models.DateField()
 
+    class Meta:
+        permissions = [
+            ('is_teacher', 'Docente'),
+            ('is_student', 'Estudiante'),
+            ('is_director', 'Directivo')
+        ]
+
+    def __str__(self):
+        return "%s %s " %(self.user.first_name, self.user.last_name)
+
+class Estudiante(models.Model):
+    usuario = models.OneToOneField(Usuario, default=None, on_delete=models.CASCADE)
+
     def edad(self):
         hoy = dt.date.today()
-        edad = hoy - self.fec_nac
+        edad = hoy - self.usuario.fec_nac
         return int(edad.days/365)
     def __str__(self):
         edad = self.edad()
-        return "%s %s -- ID: %s -- Edad: %s Años" %(self.nombre, self.apellidos, self.num_id, edad)
+        return "Estudiante: %s" %(self.usuario)
 
 class Profesor(models.Model):
-    nombre = models.CharField(max_length=30)
-    apellidos = models.CharField(max_length=60)
-    num_id = models.CharField(max_length=11)
+    usuario = models.OneToOneField(Usuario, default=None, on_delete=models.CASCADE)
 
     def __str__(self):
-        return 'Profesor: %s %s' %(self.nombre, self.apellidos)
+        return 'Profesor: %s' %(self.usuario)
+
+class Directivo(models.Model):
+    usuario = models.OneToOneField(Usuario, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return 'Directivo: %s' %(self.usuario)
 
 class Curso(models.Model):
     grado_CHOICES = [
@@ -39,7 +56,7 @@ class Curso(models.Model):
         ('10', 'Décimo'),
         ('11', 'Undécimo')
     ]
-    grado = models.CharField(max_length=2, choices=grado_CHOICES, default='0')
+    grado = models.CharField(max_length=2, choices=grado_CHOICES, default='0', unique=True)
 
     def __str__(self):
         grado_str = 'N/A'
