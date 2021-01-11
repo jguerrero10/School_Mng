@@ -1,11 +1,12 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import Group, User
 import datetime as dt
 import statistics as stats
 
 class Usuario(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    num_id = models.CharField(max_length=11)
+    rol = models.ForeignKey(Group, default=None, on_delete=models.CASCADE)
+    num_id = models.CharField(max_length=11, unique=True)
     fec_nac = models.DateField()
 
     class Meta:
@@ -17,29 +18,6 @@ class Usuario(models.Model):
 
     def __str__(self):
         return "%s %s " %(self.user.first_name, self.user.last_name)
-
-class Estudiante(models.Model):
-    usuario = models.OneToOneField(Usuario, default=None, on_delete=models.CASCADE)
-
-    def edad(self):
-        hoy = dt.date.today()
-        edad = hoy - self.usuario.fec_nac
-        return int(edad.days/365)
-    def __str__(self):
-        edad = self.edad()
-        return "Estudiante: %s" %(self.usuario)
-
-class Profesor(models.Model):
-    usuario = models.OneToOneField(Usuario, default=None, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return 'Profesor: %s' %(self.usuario)
-
-class Directivo(models.Model):
-    usuario = models.OneToOneField(Usuario, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return 'Directivo: %s' %(self.usuario)
 
 class Curso(models.Model):
     grado_CHOICES = [
@@ -68,13 +46,13 @@ class Curso(models.Model):
 class Grupo(models.Model):
     curso = models.ForeignKey(Curso, on_delete=models.CASCADE)
     nombre = models.CharField(max_length=2)
-    dir_grupo = models.OneToOneField(Profesor, on_delete=models.CASCADE)
+    dir_grupo = models.OneToOneField(Usuario, on_delete=models.CASCADE)
 
     def __str__(self):
         return '%s - %s' %(self.curso, self.nombre)   
     
 class Matricula(models.Model):
-    estudiante = models.OneToOneField(Estudiante, on_delete=models.CASCADE)
+    estudiante = models.OneToOneField(Usuario, on_delete=models.CASCADE)
     curso = models.ForeignKey(Grupo, on_delete=models.CASCADE)
     estado = models.BooleanField(default=False)
 
@@ -82,7 +60,7 @@ class Matricula(models.Model):
         return "%s Matriculado en el Curso: %s" %(self.estudiante, self.curso)
 
 class Asignatura(models.Model):
-    profesor = models.ForeignKey(Profesor, on_delete=models.CASCADE)
+    profesor = models.ForeignKey(Usuario, on_delete=models.CASCADE)
     nombre = models.CharField(max_length=30)
 
     def __str__(self):

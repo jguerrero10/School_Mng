@@ -3,7 +3,9 @@ from django.shortcuts import redirect, render
 from django.http import JsonResponse
 from django.contrib.auth import authenticate, login, logout 
 from django.urls import reverse
+from django.contrib.auth.models import User, Group, Permission
 from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib import messages
 from .forms import *
 
 def login_(request):
@@ -50,90 +52,36 @@ def index_profesor(request):
     return render(request, 'profesor/index.html')
 
 @permission_required('school.is_director', login_url='/login/')
-def matricula_index(request):
-    matriculas = Matricula.objects.all()
-    context = {'matriculas': matriculas}
-    return render(request, 'matricula/index.html', context)
-
-def crear_matricula(request):
-    formMatricula = MatriculaForm()    
-    context = {'formMatricula': formMatricula}
-    return render(request, 'matricula/crear.html', context)
-
-def crear_estudiante(request):
-    if request.method == 'POST': 
-        form = EstudianteForm(request.POST)
+def crear_usuario(request):
+    if request.method == 'POST':
+        form = UsuarioForm(request.POST)        
         if form.is_valid():
-            form.save()
-            context = {'icon': 'success',
-                        'title': 'Correcto!!!',
-                        'text': 'Estudiante guardado correctamente.'}
-            return JsonResponse(context)
-        else:                  
-            context = {'icon': 'error',
-                        'title': 'Opps!!!',
-                        'text': 'Problemas al guardar Estudiante, verifique los datos ingresados.'}
-            return JsonResponse(context)    
+            first_name = request.POST.get('nombre')
+            last_name = request.POST.get('apellido')
+            email = request.POST.get('email')
+            username = request.POST.get('num_id')
+            rol = request.POST.get('rol')
+            grupo = Group.objects.get(id = rol)
+            user = User.objects.create_user(username, email, username, first_name=first_name, last_name=last_name)
+            user.save()
+            usuario = form.save(commit=False)
+            usuario.user = user
+            usuario.save()
+            user.groups.add(grupo)
+            messages.success(request, 'Usuario Guardado correctamente')
+            return HttpResponseRedirect(reverse('crear_usuario'))
+        else:
+            error = form.errors
+            messages.error(request, error)
+            return HttpResponseRedirect(reverse('crear_usuario'))
     else:
-        form = EstudianteForm()
+        form = UsuarioForm()
         context = {'form': form}
-        return render(request, 'estudiante/formEstudiante.html', context)
+        return render(request, 'director/crear_usuario.html', context)
 
-def crear_grupo(request):
-    if request.method == 'POST':
-        form = GrupoForm(request.POST)
-        if form.is_valid():
-            form.save()
-            context = {'icon': 'success',
-                        'title': 'Correcto!!!',
-                        'text': 'Grupo guardado correctamente.'}
-            print(context)
-            return JsonResponse(context)
-        else:
-            context = {'icon': 'error',
-                        'title': 'Opps!!!',
-                        'text': 'Problemas al guardar el Grupo, verifique los datos ingresados.'}
-            return JsonResponse(context)
-    else:
-        form = GrupoForm()
-        context = {'formGrupo': form}
-        return render(request, 'grupo/crear.html', context)
-
-def crear_curso(request):
-    if request.method == 'POST':
-        form = CursoForm(request.POST)
-        if form.is_valid():
-            form.save()
-            context = {'icon': 'success',
-                        'title': 'Correcto!!!',
-                        'text': 'Grado guardado correctamente.'}
-            return JsonResponse(context)
-        else:
-            context = {'icon': 'error',
-                        'title': 'Opps!!!',
-                        'text': 'Problemas al guardar el Grado, Comuniquese con el admin.'}
-            return JsonResponse(context)
-    else:
-        form = CursoForm()
-        context = {'formCurso': form}
-        return render(request, 'grupo/formCurso.html', context)
-
-def crear_profesor(request):
-    if request.method == 'POST':
-        form = ProfesorForm(request.POST)
-        if form.is_valid():
-            form.save()
-            context = {'icon': 'success',
-                        'title': 'Correcto!!!',
-                        'text': 'Grado guardado correctamente.'}
-            return JsonResponse(context)
-        else:
-            context = {'icon': 'error',
-                        'title': 'Opps!!!',
-                        'text': 'Problemas al guardar Profesor, verifique los datos ingresados.'}
-            return JsonResponse(context)
-            
-    else:
-        formProfesor = ProfesorForm()
-        context = {'formProfesor': formProfesor}
-        return render(request, 'profesor/formProfesor.html', context)
+@permission_required('school.is_director', login_url='/login/')
+def leer_estudiantes(request):
+    grupo = Group.objects.get(id=1)
+    estudiantes = grupo.user_set.all()    
+    context = {'estudiantes': estudiantes}
+    return render(request, 'director/list_estudiantes.html', context)
